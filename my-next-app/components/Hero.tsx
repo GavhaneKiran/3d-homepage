@@ -66,10 +66,13 @@ export default function Hero() {
 
       <div className="mt-10 flex flex-1 flex-col gap-4 md:mt-0">
         <IndustryFilters />
-        <div className="relative h-[320px] w-full overflow-hidden rounded-full border border-sky-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 shadow-[0_0_80px_rgba(56,189,248,0.25)] md:h-[420px]">
+        {/* <div className="relative h-[320px] w-full overflow-hidden rounded-full border border-sky-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 shadow-[0_0_80px_rgba(56,189,248,0.25)] md:h-[420px]">
           <GlobeCanvas />
-        </div>
-      </div>
+        </div> */}
+        <div className="relative h-80 w-full md:h-[420px]">
+            <GlobeCanvas />
+          </div>
+       </div>
     </>
   );
 }
