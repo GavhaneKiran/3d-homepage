@@ -64,16 +64,64 @@
 //   );
 // }
 
+// import Navbar from "@/components/Navbar";
+// import Hero from "@/components/Hero";
+// import Spline from '@splinetool/react-spline/next';
+
+// export default function Home() {
+//   return (
+//     <main className="min-h-screen bg-linear-to-br from-slate-950 via-slate-950 to-slate-900 text-slate-50">
+//       <Navbar />
+//       <div className="mx-auto flex max-w-6xl flex-col gap-16 px-4 pt-28 pb-16 md:flex-row md:items-center md:pt-36">
+//         <Hero />
+//       </div>
+//        <Spline
+//         scene="https://prod.spline.design/90j6YM8t13nGdGSt/scene.splinecode" 
+//       />
+//     </main>
+//   );
+// }
+import Spline from '@splinetool/react-spline';
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-linear-to-br from-slate-950 via-slate-950 to-slate-900 text-slate-50">
-      <Navbar />
-      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-4 pt-28 pb-16 md:flex-row md:items-center md:pt-36">
-        <Hero />
-      </div>
+
+    
+    
+    <main className="w-full text-slate-50">
+
+      {/* SECTION 1 — Fullscreen Spline
+      <section className="h-screen w-full overflow-hidden">
+        <Spline scene="https://prod.spline.design/90j6YM8t13nGdGSt/scene.splinecode" />
+      </section> */}
+      <section className="relative h-screen w-full overflow-hidden">
+
+  {/* Cover the Spline watermark */}
+  <div className="absolute bottom-[23px] right-[20px] z-50 h-[45px] w-[180px] bg-slate-900/95 rounded-lg flex items-center justify-center">
+  <span className="text-base font-semibold text-white/95">Mmr Statistics</span>
+</div>
+
+
+
+  <Spline scene="https://prod.spline.design/90j6YM8t13nGdGSt/scene.splinecode" />
+</section>
+
+        {/* <div className="absolute bottom-4 right-4 bg-zinc-800 text-white px-4 py-2 rounded-lg shadow-lg text-lg font-semibold hover:text-green-400 transition-all">
+          Mmr Staistics
+        </div> */}
+        
+
+      {/* SECTION 2 — Your existing homepage */}
+      <section className="min-h-screen bg-linear-to-br from-slate-950 via-slate-950 to-slate-900">
+        <Navbar />
+
+        <div className="mx-auto flex max-w-6xl flex-col gap-16 px-4 pt-28 pb-16 md:flex-row md:items-center md:pt-36">
+          <Hero />
+        </div>
+      </section>
+      
     </main>
   );
 }
