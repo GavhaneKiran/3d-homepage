@@ -114,14 +114,11 @@ export default function Home() {
         
 
       {/* SECTION 2 — Your existing homepage */}
-      <section className="min-h-screen bg-linear-to-br from-slate-950 via-slate-950 to-slate-900">
-        <Navbar />
-
-        <div className="mx-auto flex max-w-6xl flex-col gap-16 px-4 pt-28 pb-16 md:flex-row md:items-center md:pt-36">
+      <section className="relative w-full min-h-screen overflow-hidden bg-[#020617]">
+          <Navbar />
           <Hero />
-        </div>
-      </section>
-      
+        </section>
+
     </main>
   );
 }
