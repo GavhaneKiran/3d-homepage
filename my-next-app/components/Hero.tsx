@@ -97,7 +97,7 @@ export default function Hero() {
     <section className="relative w-full h-screen flex items-center text-white overflow-hidden">
 
       {/* Smooth Hero Gradient Over Spline */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#071122]/70 to-[#020617]" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent via-[#030B18]/80 to-[#030B18]" />
 
       {/* CONTENT WRAPPER */}
       <div className="relative flex flex-col md:flex-row justify-between items-center w-full max-w-[1400px] mx-auto px-16">
