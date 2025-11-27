@@ -1,0 +1,63 @@
+🌍 3D Interactive Globe — React + Three.js + R3F
+🤙 Welcome to the Globe That Survived 37 Errors and 2 Mental Breakdowns
+
+This is the 3D interactive Earth that started as a simple idea and escalated into:
+fighting R3F errors
+wrestling Tailwind
+moving India 17 times
+and realizing Three.js geometry uses radians and not ✨ vibes ✨
+But hey, it works now.
+
+✨ Features (Now That Everything Actually Works)
+
+🌀 Auto-rotating Earth (gentle, not helicopter mode anymore)
+🌍 High-quality textures that make Earth look moisturized
+🎯 Clickable Regions (Asia, EU, NA, SA, Africa, India)
+📍 Hover highlights with smoother vibes
+🔵 Blue-ish marker glow (your request vibes)
+⚡ Optimized so your laptop doesn’t ascend to heaven
+📱 Fully responsive — even on tiny potato phones
+
+📸 Vibes Preview
+<img width="1894" height="864" alt="Screenshot 2025-11-27 114729" src="https://github.com/user-attachments/assets/39546f4b-0f64-4059-932c-d5fb297e5075" />
+<img width="794" height="597" alt="Screenshot 2025-11-19 150748" src="https://github.com/user-attachments/assets/a9d5bf9a-840c-4c70-84f9-a391e44838f5" />
+
+🧩 Project Structure (aka The Organized Part)
+/app
+  /components
+    GlobeCanvas.tsx      <-- chaos controller
+    GlobeRealistic.tsx   <-- where magic happens
+    Regions.tsx          <-- where India cried
+  page.tsx
+/public/textures/earth
+  earth-dark.jpg
+  earth-bump.jpg
+  earth-specular.jpg
+
+🏃‍♂️ Installation (Mentally Prepare First)
+git clone https://github.com/GavhaneKiran/3d-homepage
+cd <repo-name>
+
+npm install
+npm run dev
+
+//Go to 👉 http://localhost:3000
+If it doesn’t show the globe, rotate your monitor manually.
+
+🧠 Future Plans (If My Brain Recovers)
+
+Zoom without breaking the camera
+Real country borders
+Flight path animations
+Day/Night toggle
+Add Easter Egg: Find the bug that caused me pain
+
+🤝 Contribute
+
+Contributions welcome.
+If you find a bug, congrats — you’ve joined the team.
+Please don’t ask to add flat-earth mode.
+
+📜 License
+
+MIT — do whatever, just don’t summon demons with it.
