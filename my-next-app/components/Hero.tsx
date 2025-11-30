@@ -78,7 +78,7 @@
 "use client";
 
 import GlobeCanvas from "./GlobeCanvas";
-import { Briefcase, BarChart3 } from "lucide-react";
+// import { Briefcase, BarChart3 } from "lucide-react";
 
 export default function Hero() {
   return (

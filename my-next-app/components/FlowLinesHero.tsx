@@ -120,13 +120,23 @@
 "use client";
 
 import * as THREE from "three";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useRef, useMemo } from "react";
+import { ReactNode } from "react";
 
 //  BIGGER CIRCLE — increased BASE_RADIUS and SPACING 
 const LAYERS = 30;
 const POINTS = 260;
-const BASE_RADIUS = 16;        // was 12 → makes the circle MUCH bigger
+const BASE_RADIUS =
+  typeof window !== "undefined"
+    ? window.innerWidth < 480
+      ? 8      // small phones
+      : window.innerWidth < 768
+      ? 10     // larger phones / small tablets
+      : window.innerWidth < 1024
+      ? 13     // tablets
+      : 16     // desktop
+    : 16;
 const LINE_SPACING = 0.28;     // was 0.22 → more spread between lines
 
 // color blue various varient
@@ -168,10 +178,31 @@ export default function FlowLinesHero() {
       }}
     >
       <ambientLight intensity={0.55} />
-      <CircularLines />
+
+      {/* 🔵 RESPONSIVE WRAPPER */}
+      <ResponsiveScale>
+        <CircularLines />
+      </ResponsiveScale>
     </Canvas>
   );
 }
+
+function ResponsiveScale({ children }: { children: ReactNode }) {
+  const { size } = useThree();
+
+  const scale =
+    size.width < 480
+      ? 0.42
+      : size.width < 768
+      ? 0.6
+      : size.width < 1024
+      ? 0.8
+      : 1;
+
+  return <group scale={[scale, scale, scale]}>{children}</group>;
+}
+
+
 
 function CircularLines() {
   const group = useRef<THREE.Group>(null);

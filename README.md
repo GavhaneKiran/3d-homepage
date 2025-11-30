@@ -44,6 +44,36 @@ npm run dev
 //Go to 👉 http://localhost:3000
 If it doesn’t show the globe, rotate your monitor manually.
 
+💥 Legendary Bugs That Tried to End This Project
+
+Here are the actual chaos moments that built character:
+
+❌ R3F: Div is not part of the THREE namespace
+I tried adding <div> inside a Canvas like a psychopath.
+Canvas said: “bro what.”
+
+❌ Cannot redeclare exported variable 'default'
+Because why have ONE default when you can have MANY and cry?
+
+❌ Cannot find name 'onRegionHover'
+I forgot to define it.
+Several times.
+
+❌ Globe too big. Then too small. Then too big again.
+Every adjustment:
+“bro why are you like this?”
+
+❌ Tailwind @apply melted
+Unknown at rule? Same bro… same.
+
+❌ Textures not loading
+Me: “Why is Earth black?”
+Browser: “404.”
+Mood: “Same.”
+
+❌ Laptop fan screaming at 3 AM
+Apologies to all nearby humans.
+
 🧠 Future Plans (If My Brain Recovers)
 
 Zoom without breaking the camera
@@ -56,7 +86,7 @@ Add Easter Egg: Find the bug that caused me pain
 
 Contributions welcome.
 If you find a bug, congrats — you’ve joined the team.
-Please don’t ask to add flat-earth mode.
+Just don’t open an issue asking why the Earth isn’t flat.
 
 📜 License
 
