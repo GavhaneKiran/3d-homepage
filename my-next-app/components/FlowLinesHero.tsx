@@ -121,45 +121,24 @@
 
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useMemo } from "react";
-import { ReactNode } from "react";
+import { useRef, useMemo, ReactNode } from "react";
 
-//  BIGGER CIRCLE — increased BASE_RADIUS and SPACING 
+// Lines configuration (server-safe constants)
 const LAYERS = 30;
 const POINTS = 260;
-const BASE_RADIUS =
-  typeof window !== "undefined"
-    ? window.innerWidth < 480
-      ? 8      // small phones
-      : window.innerWidth < 768
-      ? 10     // larger phones / small tablets
-      : window.innerWidth < 1024
-      ? 13     // tablets
-      : 16     // desktop
-    : 16;
-const LINE_SPACING = 0.28;     // was 0.22 → more spread between lines
+const BASE_RADIUS = 16; // base, scaled via ResponsiveScale
+const LINE_SPACING = 0.28;
 
-// color blue various varient
-// const COLOR_PALETTE = [
-//   [0.92, 0.85, 0.75], // soft pink
-//   [0.78, 0.85, 0.70], // purple
-//   [0.58, 0.90, 0.65], // cyan-teal
-//   [0.55, 0.85, 0.60], // aqua blue
-//   [0.46, 0.80, 0.62], // greenish teal
-// ];
-// ⭐ PROFESSIONAL BLUE-ONLY SHADES (Spline-style)
 const BLUE_PALETTE = [
-  [0.58, 0.85, 0.55], // cyan blue
-  [0.60, 0.90, 0.52], // bright aqua
-  [0.62, 0.78, 0.48], // electric teal-blue
-  [0.64, 0.70, 0.42], // sky blue
-  [0.66, 0.65, 0.38], // cool blue
-  [0.68, 0.58, 0.32], // deep blue
-  [0.70, 0.50, 0.28], // navy-blue tint
+  [0.58, 0.85, 0.55],
+  [0.60, 0.90, 0.52],
+  [0.62, 0.78, 0.48],
+  [0.64, 0.70, 0.42],
+  [0.66, 0.65, 0.38],
+  [0.68, 0.58, 0.32],
+  [0.70, 0.50, 0.28],
 ];
 
-
-// STATIC RANDOM SEEDS
 const seeds = Array.from({ length: LAYERS }).map(() => ({
   phase: Math.random() * Math.PI * 2,
   amp: 0.18 + Math.random() * 0.25,
@@ -178,8 +157,6 @@ export default function FlowLinesHero() {
       }}
     >
       <ambientLight intensity={0.55} />
-
-      {/* 🔵 RESPONSIVE WRAPPER */}
       <ResponsiveScale>
         <CircularLines />
       </ResponsiveScale>
@@ -191,27 +168,27 @@ function ResponsiveScale({ children }: { children: ReactNode }) {
   const { size } = useThree();
 
   const scale =
-    size.width < 480
-      ? 0.42
-      : size.width < 768
-      ? 0.6
+    size.width < 420
+      ? 0.32
+      : size.width < 640
+      ? 0.52
       : size.width < 1024
-      ? 0.8
+      ? 0.78
       : 1;
 
-  return <group scale={[scale, scale, scale]}>{children}</group>;
+  // Slightly translate up on mobile so hero text doesn't overlap the center
+  const y = size.width < 640 ? 0.8 : 0;
+
+  return <group scale={[scale, scale, scale]} position={[0, y, 0]}>{children}</group>;
 }
-
-
 
 function CircularLines() {
   const group = useRef<THREE.Group>(null);
 
-  // ANGLES FOR PERFECT FULL CIRCLE
   const baseAngles = useMemo(() => {
     const arr = new Float32Array(POINTS);
     for (let i = 0; i < POINTS; i++) {
-      arr[i] = (i / (POINTS - 1)) * Math.PI * 2; // full circle
+      arr[i] = (i / (POINTS - 1)) * Math.PI * 2;
     }
     return arr;
   }, []);
@@ -223,20 +200,17 @@ function CircularLines() {
       const positions = new Float32Array(POINTS * 3);
       for (let p = 0; p < POINTS; p++) {
         const a = baseAngles[p];
-
         positions[p * 3] = Math.cos(a) * radius;
-        positions[p * 3 + 1] = Math.sin(a) * radius * 0.34; // oval shape
-        positions[p * 3 + 2] = -i * 0.22;                   // depth
+        positions[p * 3 + 1] = Math.sin(a) * radius * 0.34;
+        positions[p * 3 + 2] = -i * 0.22;
       }
 
-      // chaged color to just blue varients
       const c = BLUE_PALETTE[i % BLUE_PALETTE.length];
-        const mat = new THREE.LineBasicMaterial({
-          color: new THREE.Color().setHSL(c[0], c[1], c[2]),
-          transparent: true,
-          opacity: 0.87 - i * 0.02,
-        });
-
+      const mat = new THREE.LineBasicMaterial({
+        color: new THREE.Color().setHSL(c[0], c[1], c[2]),
+        transparent: true,
+        opacity: 0.87 - i * 0.02,
+      });
 
       const geo = new THREE.BufferGeometry();
       geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
@@ -256,7 +230,6 @@ function CircularLines() {
     layers.forEach((L, i) => {
       const { phase, amp, speed } = seeds[i];
       const pos = L.geo.attributes.position.array as Float32Array;
-
       const radiusBase = BASE_RADIUS + i * LINE_SPACING;
 
       for (let p = 0; p < POINTS; p++) {
