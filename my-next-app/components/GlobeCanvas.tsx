@@ -6,6 +6,7 @@
 // import { useRef, useEffect, useState } from "react";
 // import * as THREE from "three";
 
+// /* ------------------------- TYPES ------------------------- */
 // type RegionId =
 //   | "northAmerica"
 //   | "southAmerica"
@@ -22,6 +23,7 @@
 //   notes: string;
 // };
 
+// /* ------------------------- META ------------------------- */
 // const REGION_META: Record<RegionId, RegionMeta> = {
 //   northAmerica: {
 //     id: "northAmerica",
@@ -78,6 +80,11 @@
 
 // const COLOR_TOLERANCE = 60;
 
+// /* --- Detect mobile device (simple & reliable) --- */
+// const isMobile = () =>
+//   typeof window !== "undefined" && window.innerWidth < 768;
+
+// /* ------------------------- REGION DETECTION ------------------------- */
 // function detectRegion(r: number, g: number, b: number): RegionId | null {
 //   let best: { id: RegionId | null; dist: number } = { id: null, dist: Infinity };
 
@@ -87,30 +94,37 @@
 //     if (dist < best.dist) best = { id: region.id, dist };
 //   }
 
-//   if (best.dist > COLOR_TOLERANCE) return null;
-//   return best.id;
+//   return best.dist > COLOR_TOLERANCE ? null : best.id;
 // }
 
-// function GlobeRealistic({ onRegionHover }: { onRegionHover?: (region: RegionId | null) => void }) {
+// /* ------------------------- GLOBE ------------------------- */
+// function GlobeRealistic({
+//   onRegionChange,
+// }: {
+//   onRegionChange: (region: RegionId | null) => void;
+// }) {
 //   const globeRef = useRef<THREE.Mesh | null>(null);
 
-//   const [isHovering, setIsHovering] = useState(false);
+//   const [hoverEnabled, setHoverEnabled] = useState(!isMobile());
+//   const [isTouchSelecting, setIsTouchSelecting] = useState(false);
 
 //   const [colorTexture, idMap] = useTexture([
 //     "/textures/earth/earth-dark.png",
 //     "/textures/earth/earth-regions.png",
 //   ]) as [THREE.Texture, THREE.Texture];
 
+//   /* Canvas read buffer */
 //   const idCanvasRef = useRef<HTMLCanvasElement | null>(null);
 //   const idCtxRef = useRef<CanvasRenderingContext2D | null>(null);
 
 //   useEffect(() => {
-//     const img = idMap?.image as HTMLImageElement | undefined;
+//     const img = idMap.image as HTMLImageElement;
 //     if (!img) return;
 
 //     const canvas = document.createElement("canvas");
 //     canvas.width = img.width;
 //     canvas.height = img.height;
+
 //     const ctx = canvas.getContext("2d");
 //     if (!ctx) return;
 
@@ -119,95 +133,121 @@
 //     idCtxRef.current = ctx;
 //   }, [idMap]);
 
+//   /* Auto rotation */
 //   useFrame(() => {
-//     if (!isHovering && globeRef.current) {
+//     if (!isTouchSelecting && globeRef.current) {
 //       globeRef.current.rotation.y += 0.001;
 //     }
 //   });
 
-//   const pointerMove = (e: ThreeEvent<PointerEvent>) => {
+//   /* Region reading helper */
+//   function readRegion(e: ThreeEvent<PointerEvent>) {
 //     const uv = e.uv;
 //     const ctx = idCtxRef.current;
-//     const img = idMap?.image as HTMLImageElement | undefined;
-//     if (!uv || !ctx || !img) return;
+//     const img = idMap.image as HTMLImageElement;
+
+//     if (!uv || !ctx || !img) return null;
 
 //     const x = Math.floor(uv.x * img.width);
 //     const y = Math.floor((1 - uv.y) * img.height);
-//     const data = ctx.getImageData(x, y, 1, 1).data;
-//     const [r, g, b, a] = data;
 
-//     if (a === 0) {
-//       onRegionHover?.(null);
-//       return;
-//     }
+//     const [r, g, b, a] = ctx.getImageData(x, y, 1, 1).data;
+//     if (a === 0) return null;
 
-//     const region = detectRegion(r, g, b);
-//     onRegionHover?.(region);
+//     return detectRegion(r, g, b);
+//   }
+
+//   /* ----------------- DESKTOP: Hover Interaction ----------------- */
+//   const handleHover = (e: ThreeEvent<PointerEvent>) => {
+//     if (!hoverEnabled) return; // disabled on mobile
+//     const region = readRegion(e);
+//     onRegionChange(region);
+//   };
+
+//   const handleHoverOut = () => {
+//     if (!hoverEnabled) return;
+//     onRegionChange(null);
+//   };
+
+//   /* ----------------- MOBILE: Tap Interaction ----------------- */
+//   const handleTap = (e: ThreeEvent<PointerEvent>) => {
+//     if (hoverEnabled) return; // ignore tap on desktop
+
+//     const region = readRegion(e);
+//     setIsTouchSelecting(true);
+
+//     onRegionChange(region);
+
+//     // Resume rotation after short delay
+//     setTimeout(() => setIsTouchSelecting(false), 600);
 //   };
 
 //   return (
 //     <group>
 //       <mesh
 //         ref={globeRef}
-//         onPointerMove={(e) => {
-//           setIsHovering(true);
-//           pointerMove(e);
-//         }}
-//         onPointerOut={() => {
-//           setIsHovering(false);
-//           onRegionHover?.(null);
-//         }}
+//         /* Desktop */
+//         onPointerMove={handleHover}
+//         onPointerOut={handleHoverOut}
+//         /* Mobile */
+//         onPointerDown={handleTap}
 //       >
 //         <sphereGeometry args={[1, 64, 64]} />
 //         <meshStandardMaterial
 //           map={colorTexture}
-//           metalness={0.1}
 //           roughness={1}
-//           color="#ffffff"
+//           metalness={0.1}
 //         />
 //       </mesh>
 //     </group>
 //   );
 // }
 
+// /* ------------------------- UI LAYER ------------------------- */
 // export default function GlobeCanvas() {
 //   const [region, setRegion] = useState<RegionId | null>(null);
 //   const meta = region ? REGION_META[region] : null;
 
 //   return (
 //     <div className="relative w-full h-full">
-//       <Canvas camera={{ position: [0, 0, 3.6], fov: 42 }}>
+//       <Canvas camera={{ position: [0, 0, 3.2], fov: 42 }}>
 //         <ambientLight intensity={0.7} />
 //         <directionalLight position={[3, 3, 3]} intensity={1.3} />
-//         <GlobeRealistic onRegionHover={setRegion} />
+
+//         <GlobeRealistic onRegionChange={setRegion} />
+
 //         <OrbitControls enablePan={false} enableZoom={false} />
 //       </Canvas>
 
+//       {/* Region card */}
 //       {meta && (
 //         <div
 //           className="
-//             pointer-events-none absolute right-4 sm:right-8 top-1/2 -translate-y-1/2
+//             pointer-events-none absolute right-3 sm:right-8 
+//             top-1/2 -translate-y-1/2
 //             rounded-2xl bg-[#0c1627]/80 backdrop-blur-xl
 //             border border-white/10 shadow-lg shadow-black/40
-//             px-3 py-2 min-w-[180px] sm:min-w-60 text-xs sm:text-sm
-//             animate-[fadeIn_0.12s_ease-out]
+//             px-3 py-2 min-w-[160px] sm:min-w-[240px]
+//             text-[11px] sm:text-sm
+//             animate-[fadeIn_0.16s_ease-out]
 //           "
 //         >
-//           <p className="text-[10px] uppercase tracking-wide text-blue-400 font-semibold mb-1">
+//           <p className="uppercase text-[10px] tracking-wide text-blue-400 font-semibold mb-1">
 //             {meta.label}
 //           </p>
-//           <p className="text-[12px] text-slate-300">
+//           <p className="text-slate-300">
 //             Market size: <span className="font-semibold text-white">{meta.marketSize}</span>
 //           </p>
-//           <p className="text-[12px] text-slate-300">
+//           <p className="text-slate-300">
 //             Growth: <span className="font-semibold text-white">{meta.growth}</span>
 //           </p>
-//           <p className="mt-1 text-slate-400 text-[11px] leading-tight">{meta.notes}</p>
+//           <p className="mt-1 text-slate-400 leading-tight">{meta.notes}</p>
 //         </div>
 //       )}
 //     </div>
 //   );
 // }
+
 
 "use client";
 
@@ -290,8 +330,8 @@ const REGION_COLOR_MAP: { id: RegionId; rgb: [number, number, number] }[] = [
 
 const COLOR_TOLERANCE = 60;
 
-/* --- Detect mobile device (simple & reliable) --- */
-const isMobile = () =>
+/* --- detect mobile, safe (no useEffect) --- */
+const isMobileDevice = () =>
   typeof window !== "undefined" && window.innerWidth < 768;
 
 /* ------------------------- REGION DETECTION ------------------------- */
@@ -315,7 +355,10 @@ function GlobeRealistic({
 }) {
   const globeRef = useRef<THREE.Mesh | null>(null);
 
-  const [hoverEnabled, setHoverEnabled] = useState(!isMobile());
+  /* STOP ROTATION SYSTEM */
+  const rotationPausedRef = useRef(false);
+
+  const [hoverEnabled] = useState(!isMobileDevice());
   const [isTouchSelecting, setIsTouchSelecting] = useState(false);
 
   const [colorTexture, idMap] = useTexture([
@@ -343,10 +386,10 @@ function GlobeRealistic({
     idCtxRef.current = ctx;
   }, [idMap]);
 
-  /* Auto rotation */
+  /* Auto-rotation (pauses on hover/tap) */
   useFrame(() => {
-    if (!isTouchSelecting && globeRef.current) {
-      globeRef.current.rotation.y += 0.001;
+    if (!rotationPausedRef.current && !isTouchSelecting && globeRef.current) {
+      globeRef.current.rotation.y += 0.002;
     }
   });
 
@@ -369,45 +412,50 @@ function GlobeRealistic({
 
   /* ----------------- DESKTOP: Hover Interaction ----------------- */
   const handleHover = (e: ThreeEvent<PointerEvent>) => {
-    if (!hoverEnabled) return; // disabled on mobile
+    if (!hoverEnabled) return;
+
+    // Pause rotation
+    rotationPausedRef.current = true;
+
     const region = readRegion(e);
     onRegionChange(region);
   };
 
   const handleHoverOut = () => {
     if (!hoverEnabled) return;
+
+    // Resume rotation
+    rotationPausedRef.current = false;
+
     onRegionChange(null);
   };
 
   /* ----------------- MOBILE: Tap Interaction ----------------- */
   const handleTap = (e: ThreeEvent<PointerEvent>) => {
-    if (hoverEnabled) return; // ignore tap on desktop
+    if (hoverEnabled) return;
 
     const region = readRegion(e);
     setIsTouchSelecting(true);
 
+    rotationPausedRef.current = true;
     onRegionChange(region);
 
-    // Resume rotation after short delay
-    setTimeout(() => setIsTouchSelecting(false), 600);
+    setTimeout(() => {
+      rotationPausedRef.current = false;
+      setIsTouchSelecting(false);
+    }, 600);
   };
 
   return (
     <group>
       <mesh
         ref={globeRef}
-        /* Desktop */
         onPointerMove={handleHover}
         onPointerOut={handleHoverOut}
-        /* Mobile */
         onPointerDown={handleTap}
       >
         <sphereGeometry args={[1, 64, 64]} />
-        <meshStandardMaterial
-          map={colorTexture}
-          roughness={1}
-          metalness={0.1}
-        />
+        <meshStandardMaterial map={colorTexture} roughness={1} metalness={0.1} />
       </mesh>
     </group>
   );
@@ -429,7 +477,7 @@ export default function GlobeCanvas() {
         <OrbitControls enablePan={false} enableZoom={false} />
       </Canvas>
 
-      {/* Region card */}
+      {/* Region info card */}
       {meta && (
         <div
           className="
@@ -446,7 +494,8 @@ export default function GlobeCanvas() {
             {meta.label}
           </p>
           <p className="text-slate-300">
-            Market size: <span className="font-semibold text-white">{meta.marketSize}</span>
+            Market size:{" "}
+            <span className="font-semibold text-white">{meta.marketSize}</span>
           </p>
           <p className="text-slate-300">
             Growth: <span className="font-semibold text-white">{meta.growth}</span>
